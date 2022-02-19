@@ -33,25 +33,30 @@ class ReadWordsFromFile implements Iterator<String> {
 
 }
 
-class FilterOdd implements Iterator<Integer> {
+class FilterStopWords implements Iterator<String> {
     private Integer last = 0;
-    private Iterator<Integer> prior;
-
-    public FilterOdd(Iterator<Integer> p)
-    {
+    private Iterator<String> prior;
+    private LinkedList<String> stopWords;
+    public FilterStopWords(Iterator<String> p) throws IOException {
+        stopWords = new LinkedList<>(Arrays.asList(Files.readString(Paths.get("stop_words.txt")).toLowerCase()));
         prior = p;
     }
 
     public boolean hasNext() {
-        return true;
+        if(prior.hasNext()){
+            return true;
+        }
+        return false;
     }
 
-    public Integer next() {
-        int n = 0;
-        do {
-            n = prior.next();
-        } while (n % 2 != 0);
-        return n;
+    public String next() {
+        while(prior.hasNext()){
+            String word = prior.next();
+            if(!stopWords.contains(word)){
+                return word;
+            }
+        }
+        return null;
     }
 
     public void remove() {
@@ -87,10 +92,10 @@ class FilterDiv7 implements Iterator<Integer> {
 
 public class Iterators {
     public static void main(String[] args) throws IOException {
-        Iterator<String> gen = new ReadWordsFromFile(args[0]);
-
-        while(gen.hasNext()){
-            System.out.println(gen.next());
+        Iterator<String> words = new ReadWordsFromFile(args[0]);
+        Iterator<String> filtered_words = new FilterStopWords(words);
+        while(filtered_words.hasNext()){
+            System.out.println(filtered_words.next());
         }
 
     }
