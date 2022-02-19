@@ -1,20 +1,36 @@
-import java.util.Iterator;
-import java.util.Random;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 // templete from class
-class IntGen implements Iterator<Integer> {
+class ReadWordsFromFile implements Iterator<String> {
     private Random rand = new Random();
+    private List<String> wordsList;
+    private Integer index = 0;
 
-    public boolean hasNext() {
-        return true;
+    public ReadWordsFromFile (String filename) throws IOException {
+        wordsList = new LinkedList<>(Arrays.asList(Files.readString(Paths.get(filename)).toLowerCase().split("[^a-z]+")));
     }
-    public Integer next() {
-        return rand.nextInt(10000);
+    public boolean hasNext() {
+        if (index < wordsList.size()) {
+            return true;
+        }
+        return false;
+    }
+    public String next() {
+        if (index < wordsList.size()) {
+            String nextWord = wordsList.get(index);
+            index += 1;
+            return nextWord;
+        }
+        return null;
     }
 
     public void remove() {
 
     }
+
 }
 
 class FilterOdd implements Iterator<Integer> {
@@ -70,13 +86,11 @@ class FilterDiv7 implements Iterator<Integer> {
 }
 
 public class Iterators {
-    public static void main(String[] args) {
-        Iterator<Integer> gen = new IntGen();
-        Iterator<Integer> f1 = new FilterOdd(gen);
-        Iterator<Integer> f2 = new FilterDiv7(f1);
+    public static void main(String[] args) throws IOException {
+        Iterator<String> gen = new ReadWordsFromFile(args[0]);
 
-        while (f2.hasNext()) {
-            System.out.println(f2.next());
+        while(gen.hasNext()){
+            System.out.println(gen.next());
         }
 
     }
