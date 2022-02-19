@@ -38,7 +38,7 @@ class FilterStopWords implements Iterator<String> {
     private Iterator<String> prior;
     private LinkedList<String> stopWords;
     public FilterStopWords(Iterator<String> p) throws IOException {
-        stopWords = new LinkedList<>(Arrays.asList(Files.readString(Paths.get("stop_words.txt")).toLowerCase()));
+        stopWords = new LinkedList<>(Arrays.asList(Files.readString(Paths.get("stop_words.txt")).toLowerCase().split(",")));
         prior = p;
     }
 
@@ -52,7 +52,7 @@ class FilterStopWords implements Iterator<String> {
     public String next() {
         while(prior.hasNext()){
             String word = prior.next();
-            if(!stopWords.contains(word)){
+            if(!stopWords.contains(word) && word.length() >= 2){
                 return word;
             }
         }
@@ -86,7 +86,24 @@ class GetFreqs implements Iterator<Map<String, Integer>> {
             String word = prior.next();
             freqs.put(word, freqs.get(word)!=null ? freqs.get(word) + 1: 1);
         }
-        return freqs;
+
+        // ref: https://www.geeksforgeeks.org/sorting-a-hashmap-according-to-values/
+        List<Map.Entry<String, Integer> > list =
+                new LinkedList<Map.Entry<String, Integer> >(freqs.entrySet());
+
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer> >() {
+            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2)
+            {
+                return (o2.getValue()).compareTo(o1.getValue());
+            }
+        });
+
+        HashMap<String, Integer> sorted = new LinkedHashMap<String, Integer>();
+        for (Map.Entry<String, Integer> item : list) {
+            sorted.put(item.getKey(), item.getValue());
+        }
+
+        return sorted;
     }
 
     public void remove() {
@@ -97,9 +114,9 @@ public class Iterators {
     public static void main(String[] args) throws IOException {
         Iterator<String> words = new ReadWordsFromFile(args[0]);
         Iterator<String> filtered_words = new FilterStopWords(words);
-        Iterator<Map<String, Integer>> Freqs = new GetFreqs(filtered_words);
+        Iterator<Map<String, Integer>> sorted_Freqs = new GetFreqs(filtered_words);
         while(filtered_words.hasNext()){
-            System.out.println(Freqs.next());
+            System.out.println(sorted_Freqs.next());
         }
 
     }
