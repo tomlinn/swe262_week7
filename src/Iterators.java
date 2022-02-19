@@ -64,26 +64,29 @@ class FilterStopWords implements Iterator<String> {
     }
 }
 
-class FilterDiv7 implements Iterator<Integer> {
+class GetFreqs implements Iterator<Map<String, Integer>> {
     private Integer last = 0;
-    private Iterator<Integer> prior;
+    private Iterator<String> prior;
+    private Map<String, Integer> freqs = new HashMap<>();
 
-    public FilterDiv7(Iterator<Integer> p)
+    public GetFreqs(Iterator<String> p)
     {
         prior = p;
     }
 
     public boolean hasNext() {
-        return true;
+        if(prior.hasNext()){
+            return true;
+        }
+        return false;
     }
 
-    public Integer next() {
-        int n = 0;
-        do {
-            n = prior.next();
-        } while (n % 7 != 0 || Math.abs(n-last) < 1000);
-        last = n;
-        return n;
+    public Map<String, Integer> next() {
+        while(prior.hasNext()){
+            String word = prior.next();
+            freqs.put(word, freqs.get(word)!=null ? freqs.get(word) + 1: 1);
+        }
+        return freqs;
     }
 
     public void remove() {
@@ -94,8 +97,9 @@ public class Iterators {
     public static void main(String[] args) throws IOException {
         Iterator<String> words = new ReadWordsFromFile(args[0]);
         Iterator<String> filtered_words = new FilterStopWords(words);
+        Iterator<Map<String, Integer>> Freqs = new GetFreqs(filtered_words);
         while(filtered_words.hasNext()){
-            System.out.println(filtered_words.next());
+            System.out.println(Freqs.next());
         }
 
     }
