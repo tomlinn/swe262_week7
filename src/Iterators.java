@@ -2,8 +2,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
-// templete from class
+// ref: templete from class
 class ReadWordsFromFile implements Iterator<String> {
     private Random rand = new Random();
     private List<String> wordsList;
@@ -118,9 +120,17 @@ public class Iterators {
         Iterator<String> words = new ReadWordsFromFile(args[0]);
         Iterator<String> filtered_words = new FilterStopWords(words);
         Iterator<Map<String, Integer>> sorted_Freqs = new GetFreqs(filtered_words);
+        AtomicInteger count = new AtomicInteger(0);
+
         while(filtered_words.hasNext()){
-            System.out.println(sorted_Freqs.next());
+            List<String> keys = sorted_Freqs.next().keySet().stream().limit(25).collect(Collectors.toList());
+            List<Integer> values = sorted_Freqs.next().values().stream().limit(25).collect(Collectors.toList());
+            System.out.println("-------- "+count.incrementAndGet()+" --------");
+            for (int i = 0; i < 25; i++) {
+                System.out.println(keys.get(i) + " - " + values.get(i));
+            }
         }
+
 
     }
 }
