@@ -82,9 +82,12 @@ class GetFreqs implements Iterator<Map<String, Integer>> {
     }
 
     public Map<String, Integer> next() {
-        while(prior.hasNext()){
+
+        Integer wordCount = 0;
+        while(prior.hasNext() && wordCount < 5000){
             String word = prior.next();
             freqs.put(word, freqs.get(word)!=null ? freqs.get(word) + 1: 1);
+            wordCount ++;
         }
 
         // ref: https://www.geeksforgeeks.org/sorting-a-hashmap-according-to-values/
